@@ -37,6 +37,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import aosp.working.cggenerator.Global;
+import aosp.working.cggenerator.dto.ClassInfo;
+import aosp.working.cggenerator.dto.JarInfo;
 import org.apache.bcel.classfile.ClassParser;
 
 /**
@@ -48,9 +50,7 @@ import org.apache.bcel.classfile.ClassParser;
 public class JCallGraph {
 
     public static void main(String[] args) {
-
         Global.initLogger();
-
         Function<ClassParser, ClassVisitor> getClassVisitor = (ClassParser cp) -> {
             try {
                 return new ClassVisitor(cp.parse());
@@ -67,48 +67,29 @@ public class JCallGraph {
                 }
 
                 try (JarFile jar = new JarFile(f)) {
+                    JarInfo jarInfo = new JarInfo();
+                    jarInfo.setJarPath(f.getPath());
+                    List<ClassInfo> classesInfo = new ArrayList<>();
+
                     Enumeration<JarEntry> entries = jar.entries();
                     while (entries.hasMoreElements()) {
+                        ClassInfo classInfo = new ClassInfo();
                         JarEntry entry = entries.nextElement();
+                        if (entry.isDirectory() || !entry.getName().endsWith(".class")) {
+                            continue;
+                        }
+
                         ClassParser cp = new ClassParser(arg, entry.getName());
                         ClassVisitor visitor = getClassVisitor.apply(cp).start();
+                        classInfo.setFullyQualifiedName(visitor.getFullyQualifiedName());
                         //System.out.println(visitor.methodCalls());
                     }
-                    /*
-                    Stream<JarEntry> entries = enumerationAsStream(jar.entries());
-                    String methodCalls = entries.
-                            flatMap(e -> {
-                                if (e.isDirectory() || !e.getName().endsWith(".class"))
-                                    return (new ArrayList<String>()).stream();
-
-                                ClassParser cp = new ClassParser(arg, e.getName());
-                                return getClassVisitor.apply(cp).start().methodCalls().stream();
-                            }).
-                            map(s -> s + "\n").
-                            reduce(new StringBuilder(),
-                                    StringBuilder::append,
-                                    StringBuilder::append).toString();
-                    */
+                    jarInfo.setClassesInfo(classesInfo);
                 }
             }
         } catch (IOException e) {
             System.err.println("Error while processing jar: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    public static <T> Stream<T> enumerationAsStream(Enumeration<T> e) {
-        return StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(
-                        new Iterator<T>() {
-                            public T next() {
-                                return e.nextElement();
-                            }
-
-                            public boolean hasNext() {
-                                return e.hasMoreElements();
-                            }
-                        },
-                        Spliterator.ORDERED), false);
     }
 }

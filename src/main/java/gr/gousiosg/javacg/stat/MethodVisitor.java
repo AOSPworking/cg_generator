@@ -28,18 +28,21 @@
 
 package gr.gousiosg.javacg.stat;
 
+import aosp.working.cggenerator.dto.MethodInfo;
+import aosp.working.cggenerator.dto.MethodMetadata;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.generic.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * The simplest of method visitors, prints any invoked method
- * signature for all method invocations.
- * 
- * Class copied with modifications from CJKM: http://www.spinellis.gr/sw/ckjm/
+ * MethodVisitor 是对 method 进行 visit。
+ * 这并不意味着该 Visitor 可以直接获取到所有的 method invoke statement。
+ * MethodVisitor 看到的应该是 class 下的 method definition。
+ * 所以需要读出 method 的每条指令，再具体分析语句类别。（如是否为 method invoke 类，继而再 accept）
  */
 public class MethodVisitor extends EmptyVisitor {
 
@@ -47,6 +50,9 @@ public class MethodVisitor extends EmptyVisitor {
     private MethodGen mg;
     private ConstantPoolGen cp;
     private String format;
+
+    private MethodMetadata methodMetadata;
+    private List<MethodMetadata> callingMethods = new ArrayList<>(); // all the methods calling this method.
     private List<String> methodCalls = new ArrayList<>();
 
     public MethodVisitor(MethodGen m, JavaClass jc) {
@@ -68,50 +74,81 @@ public class MethodVisitor extends EmptyVisitor {
         return sb.toString();
     }
 
-    public List<String> start() {
-        if (mg.isAbstract() || mg.isNative())
-            return Collections.emptyList();
-
-        for (InstructionHandle ih = mg.getInstructionList().getStart(); 
-                ih != null; ih = ih.getNext()) {
-            Instruction i = ih.getInstruction();
-            
-            if (!visitInstruction(i))
-                i.accept(this);
+    public MethodVisitor start() {
+        if (mg.isAbstract() || mg.isNative() || mg.getMethod().getCode() == null) {
+            return null;
         }
-        return methodCalls;
+
+        // 对于当前方法内的所有语句。
+        for (InstructionHandle ih = mg.getInstructionList().getStart(); ih != null; ih = ih.getNext()) {
+            Instruction i = ih.getInstruction();
+            if (!visitInstruction(i)) {
+                i.accept(this);
+            }
+        }
+        return this;
     }
 
     private boolean visitInstruction(Instruction i) {
         short opcode = i.getOpcode();
         return ((InstructionConst.getInstruction(opcode) != null)
-                && !(i instanceof ConstantPushInstruction) 
+                && !(i instanceof ConstantPushInstruction)
                 && !(i instanceof ReturnInstruction));
+    }
+
+    public MethodMetadata getMethodMetadata() {
+        return this.methodMetadata;
+    }
+
+    public List<MethodMetadata> getCallingMethods() {
+        return this.callingMethods;
     }
 
     @Override
     public void visitINVOKEVIRTUAL(INVOKEVIRTUAL i) {
         methodCalls.add(String.format(format,"M",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
+        this.callingMethods.add(this.makeMethodMetadata(i));
     }
 
     @Override
     public void visitINVOKEINTERFACE(INVOKEINTERFACE i) {
         methodCalls.add(String.format(format,"I",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
+        this.callingMethods.add(this.makeMethodMetadata(i));
     }
 
     @Override
     public void visitINVOKESPECIAL(INVOKESPECIAL i) {
         methodCalls.add(String.format(format,"O",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
+        this.callingMethods.add(this.makeMethodMetadata(i));
     }
 
     @Override
     public void visitINVOKESTATIC(INVOKESTATIC i) {
         methodCalls.add(String.format(format,"S",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
+        this.callingMethods.add(this.makeMethodMetadata(i));
     }
 
     @Override
     public void visitINVOKEDYNAMIC(INVOKEDYNAMIC i) {
-        methodCalls.add(String.format(format,"D",i.getType(cp),i.getMethodName(cp),
-                argumentList(i.getArgumentTypes(cp))));
+        methodCalls.add(String.format(format,"D",i.getType(cp),i.getMethodName(cp), argumentList(i.getArgumentTypes(cp))));
+        this.callingMethods.add(this.makeMethodMetadata(i));
+    }
+
+    /**
+     * 根据一个 Invoke 指令来构造 MethodMetadata
+     * @param i invoke method 的指令。
+     * @return
+     */
+    private MethodMetadata makeMethodMetadata(InvokeInstruction i) {
+        MethodMetadata methodMetadata = new MethodMetadata();
+        methodMetadata.setFullyQualifiedName(i.getClassName(cp) + "." + i.getMethodName(cp));
+        methodMetadata.setNonFullyQualifiedName(i.getName(cp));
+        methodMetadata.setReturnType(i.getReturnType(cp).toString());
+        List<String> paramsType = new ArrayList<>();
+        for (Type argumentType : i.getArgumentTypes(cp)) {
+            paramsType.add(argumentType.toString());
+        }
+        methodMetadata.setParamsType(paramsType);
+        return methodMetadata;
     }
 }
