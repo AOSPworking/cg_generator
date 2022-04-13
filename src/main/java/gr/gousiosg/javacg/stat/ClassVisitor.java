@@ -88,7 +88,7 @@ public class ClassVisitor extends EmptyVisitor {
     public void visitMethod(Method method) {
         MethodGen mg = new MethodGen(method, clazz.getClassName(), constants);
         MethodVisitor visitor = new MethodVisitor(mg, clazz);
-        methodCalls.addAll(visitor.start());
+        visitor.start();
     }
 
     public ClassVisitor start() {
@@ -96,7 +96,7 @@ public class ClassVisitor extends EmptyVisitor {
         return this;
     }
 
-    public List<String> methodCalls() {
-        return this.methodCalls;
+    public String getFullyQualifiedName() {
+        return this.clazz.getClassName();
     }
 }

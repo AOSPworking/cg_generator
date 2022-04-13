@@ -78,22 +78,14 @@ public class MethodVisitor extends EmptyVisitor {
         if (mg.isAbstract() || mg.isNative() || mg.getMethod().getCode() == null) {
             return null;
         }
-
-        // 对于当前方法内的所有语句。
+        // 遍历当前方法下的所有 instruction，对每条 instruction 都看是否需要 accept。
         for (InstructionHandle ih = mg.getInstructionList().getStart(); ih != null; ih = ih.getNext()) {
             Instruction i = ih.getInstruction();
-            if (!visitInstruction(i)) {
+            if (i instanceof InvokeInstruction) {
                 i.accept(this);
             }
         }
         return this;
-    }
-
-    private boolean visitInstruction(Instruction i) {
-        short opcode = i.getOpcode();
-        return ((InstructionConst.getInstruction(opcode) != null)
-                && !(i instanceof ConstantPushInstruction)
-                && !(i instanceof ReturnInstruction));
     }
 
     public MethodMetadata getMethodMetadata() {
