@@ -88,6 +88,13 @@ public class DynamicCallManager {
         while (matcher.find()) {
             int bootIndex = Integer.parseInt(matcher.group(1));
             BootstrapMethod bootMethod = boots[bootIndex];
+
+            int[] args = bootMethod.getBootstrapArguments();
+            if (args.length <= CALL_HANDLE_INDEX_ARGUMENT) {
+                // nani?
+                continue;
+            }
+
             int calledIndex = bootMethod.getBootstrapArguments()[CALL_HANDLE_INDEX_ARGUMENT];
             String calledName = getMethodNameFromHandleIndex(cp, calledIndex);
             String callerName = method.getName();
