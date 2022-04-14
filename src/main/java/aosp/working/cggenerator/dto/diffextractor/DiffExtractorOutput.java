@@ -1,9 +1,11 @@
-package aosp.working.cggenerator.dto;
+package aosp.working.cggenerator.dto.diffextractor;
+
+import aosp.working.cggenerator.dto.ChangeFile;
 
 import java.util.List;
 import java.util.Map;
 
-public class ExtractDiff {
+public class DiffExtractorOutput {
     public Map<String, List<ChangeFile>> commits;
 
     public Map<String, List<ChangeFile>> getCommits() {
