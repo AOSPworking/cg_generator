@@ -54,7 +54,7 @@ public class ClassVisitor extends EmptyVisitor {
 
     private String fullyQualifiedName;
     private List<MethodInfo> methodsInfo = new ArrayList<>();
-    private List<String> methodCalls;
+    private List<String> methodCalls = new ArrayList<>();
 
     public ClassVisitor(JavaClass jc) {
         this.clazz = jc;
