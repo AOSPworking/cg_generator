@@ -39,6 +39,9 @@ import java.util.stream.StreamSupport;
 import aosp.working.cggenerator.Global;
 import aosp.working.cggenerator.dto.ClassInfo;
 import aosp.working.cggenerator.dto.JarInfo;
+import aosp.working.cggenerator.util.FileUtil;
+import aosp.working.cggenerator.util.JSONFormatUtils;
+import com.google.gson.Gson;
 import org.apache.bcel.classfile.ClassParser;
 
 /**
@@ -82,9 +85,14 @@ public class JCallGraph {
                         ClassParser cp = new ClassParser(arg, entry.getName());
                         ClassVisitor visitor = getClassVisitor.apply(cp).start();
                         classInfo.setFullyQualifiedName(visitor.getFullyQualifiedName());
+                        classInfo.setMethodsInfo(visitor.getMethodsInfo());
+                        classesInfo.add(classInfo);
                         //System.out.println(visitor.methodCalls());
                     }
                     jarInfo.setClassesInfo(classesInfo);
+                    Gson gson = new Gson();
+                    String result = gson.toJson(jarInfo);
+                    FileUtil.writeFile("output.example.json", JSONFormatUtils.formatJson(result));
                 }
             }
         } catch (IOException e) {
