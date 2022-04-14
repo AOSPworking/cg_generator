@@ -29,6 +29,7 @@
 package gr.gousiosg.javacg.stat;
 
 import aosp.working.cggenerator.Global;
+import aosp.working.cggenerator.dto.MethodInfo;
 import org.apache.bcel.classfile.Constant;
 import org.apache.bcel.classfile.ConstantPool;
 import org.apache.bcel.classfile.EmptyVisitor;
@@ -50,15 +51,31 @@ public class ClassVisitor extends EmptyVisitor {
     private ConstantPoolGen constants;
     private String classReferenceFormat;
     private final DynamicCallManager DCManager = new DynamicCallManager();
-    private List<String> methodCalls = new ArrayList<>();
+
+    private String fullyQualifiedName;
+    private List<MethodInfo> methodsInfo = new ArrayList<>();
+    private List<String> methodCalls;
 
     public ClassVisitor(JavaClass jc) {
-        clazz = jc;
-        constants = new ConstantPoolGen(clazz.getConstantPool());
-        classReferenceFormat = "C:" + clazz.getClassName() + " %s";
+        this.clazz = jc;
+        this.constants = new ConstantPoolGen(this.clazz.getConstantPool());
+        this.classReferenceFormat = "C:" + this.clazz.getClassName() + " %s";
+    }
+
+    public String getFullyQualifiedName() {
+        return this.fullyQualifiedName;
+    }
+
+    public List<MethodInfo> getMethodsInfo() {
+        return this.methodsInfo;
+    }
+
+    public List<String> getMethodCalls() {
+        return this.methodCalls;
     }
 
     public void visitJavaClass(JavaClass jc) {
+        this.fullyQualifiedName = this.clazz.getClassName();
         jc.getConstantPool().accept(this);
         Method[] methods = jc.getMethods();
         for (Method method : methods) {
@@ -89,14 +106,16 @@ public class ClassVisitor extends EmptyVisitor {
         MethodGen mg = new MethodGen(method, clazz.getClassName(), constants);
         MethodVisitor visitor = new MethodVisitor(mg, clazz);
         visitor.start();
+
+        MethodInfo methodInfo = new MethodInfo();
+        methodInfo.setMethodMetadata(visitor.getMethodMetadata());
+        methodInfo.setCallingMethods(visitor.getCallingMethods());
+        this.methodsInfo.add(methodInfo);
+        this.methodCalls.addAll(visitor.getMethodCalls());
     }
 
     public ClassVisitor start() {
         visitJavaClass(clazz);
         return this;
-    }
-
-    public String getFullyQualifiedName() {
-        return this.clazz.getClassName();
     }
 }

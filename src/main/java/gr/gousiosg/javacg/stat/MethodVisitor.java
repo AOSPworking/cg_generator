@@ -96,4 +96,7 @@ public class MethodVisitor extends EmptyVisitor {
         return this.callingMethods;
     }
 
+    public List<String> getMethodCalls() {
+        return this.methodCalls;
+    }
 }
