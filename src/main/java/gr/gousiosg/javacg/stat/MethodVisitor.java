@@ -49,7 +49,6 @@ public class MethodVisitor extends EmptyVisitor {
     JavaClass visitedClass;
     private MethodGen mg;
     private ConstantPoolGen cp;
-    private String format;
 
     private MethodMetadata methodMetadata;
     private List<MethodMetadata> callingMethods = new ArrayList<>(); // all the methods calling this method.
@@ -59,19 +58,16 @@ public class MethodVisitor extends EmptyVisitor {
         visitedClass = jc;
         mg = m;
         cp = mg.getConstantPool();
-        format = "M:" + visitedClass.getClassName() + ":" + mg.getName() + "(" + argumentList(mg.getArgumentTypes()) + ")"
-            + " " + "(%s)%s:%s(%s)";
-    }
 
-    private String argumentList(Type[] arguments) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < arguments.length; i++) {
-            if (i != 0) {
-                sb.append(",");
-            }
-            sb.append(arguments[i].toString());
+        this.methodMetadata = new MethodMetadata();
+        this.methodMetadata.setFullyQualifiedName(mg.getClassName() + "." + mg.getName());
+        this.methodMetadata.setNonFullyQualifiedName(mg.getName());
+        this.methodMetadata.setReturnType(mg.getReturnType().toString());
+        List<String> paramsType = new ArrayList<>();
+        for (Type argType : mg.getArgumentTypes()) {
+            paramsType.add(argType.toString());
         }
-        return sb.toString();
+        this.methodMetadata.setParamsType(paramsType);
     }
 
     public MethodVisitor start() {
@@ -82,7 +78,11 @@ public class MethodVisitor extends EmptyVisitor {
         for (InstructionHandle ih = mg.getInstructionList().getStart(); ih != null; ih = ih.getNext()) {
             Instruction i = ih.getInstruction();
             if (i instanceof InvokeInstruction) {
-                i.accept(this);
+                InvokeInstructionVisitor visitor
+                        = new InvokeInstructionVisitor(this.visitedClass, this.mg);
+                i.accept(visitor);
+                this.methodCalls.add(visitor.getCallingMethodSignature());
+                this.callingMethods.add(visitor.getCallingMethod());
             }
         }
         return this;
@@ -96,51 +96,4 @@ public class MethodVisitor extends EmptyVisitor {
         return this.callingMethods;
     }
 
-    @Override
-    public void visitINVOKEVIRTUAL(INVOKEVIRTUAL i) {
-        methodCalls.add(String.format(format,"M",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
-        this.callingMethods.add(this.makeMethodMetadata(i));
-    }
-
-    @Override
-    public void visitINVOKEINTERFACE(INVOKEINTERFACE i) {
-        methodCalls.add(String.format(format,"I",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
-        this.callingMethods.add(this.makeMethodMetadata(i));
-    }
-
-    @Override
-    public void visitINVOKESPECIAL(INVOKESPECIAL i) {
-        methodCalls.add(String.format(format,"O",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
-        this.callingMethods.add(this.makeMethodMetadata(i));
-    }
-
-    @Override
-    public void visitINVOKESTATIC(INVOKESTATIC i) {
-        methodCalls.add(String.format(format,"S",i.getReferenceType(cp),i.getMethodName(cp),argumentList(i.getArgumentTypes(cp))));
-        this.callingMethods.add(this.makeMethodMetadata(i));
-    }
-
-    @Override
-    public void visitINVOKEDYNAMIC(INVOKEDYNAMIC i) {
-        methodCalls.add(String.format(format,"D",i.getType(cp),i.getMethodName(cp), argumentList(i.getArgumentTypes(cp))));
-        this.callingMethods.add(this.makeMethodMetadata(i));
-    }
-
-    /**
-     * 根据一个 Invoke 指令来构造 MethodMetadata
-     * @param i invoke method 的指令。
-     * @return
-     */
-    private MethodMetadata makeMethodMetadata(InvokeInstruction i) {
-        MethodMetadata methodMetadata = new MethodMetadata();
-        methodMetadata.setFullyQualifiedName(i.getClassName(cp) + "." + i.getMethodName(cp));
-        methodMetadata.setNonFullyQualifiedName(i.getName(cp));
-        methodMetadata.setReturnType(i.getReturnType(cp).toString());
-        List<String> paramsType = new ArrayList<>();
-        for (Type argumentType : i.getArgumentTypes(cp)) {
-            paramsType.add(argumentType.toString());
-        }
-        methodMetadata.setParamsType(paramsType);
-        return methodMetadata;
-    }
 }
