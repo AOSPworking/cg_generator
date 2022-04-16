@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Main-Class: aosp.working.cggenerator.Main
+Class-Path: bcel-6.2.jar gson-2.8.5.jar javassist-3.12.1.GA.jar log4j-1.
+ 2.17.jar
+
