@@ -65,4 +65,10 @@ public class FileUtil {
 
         return null;
     }
+
+    public static String getJarName(String jarPath) {
+        String separator = "/|\\\\";
+        String[] tmp = jarPath.split(separator);
+        return tmp[tmp.length - 1];
+    }
 }
