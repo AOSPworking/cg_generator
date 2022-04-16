@@ -27,7 +27,11 @@ public class Main {
         NinjaOriginOutput noo = NinjaOriginOutput.make(ninjaHackedOriginOutputJSONPath);
         DiffExtractorOutput deo = DiffExtractorOutput.make(diffExtractorOutputJSONPath);
 
-        List<String> jarFilesPath = noo.getAllAffectedJarFilesPath("D:\\tmp\\test-comment\\");
+        if (args.length < 1) {
+            throw new IllegalArgumentException("args.length < 1, need jar-path prefix in order to get all affected jar files using ninja-hacked output.");
+        }
+        String prefix = args[0];
+        List<String> jarFilesPath = noo.getAllAffectedJarFilesPath(prefix);
 
         // get jar info
         JCallGraph jcg = new JCallGraph();
