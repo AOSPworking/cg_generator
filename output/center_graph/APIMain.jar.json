@@ -1,0 +1,26 @@
+{
+  "jarPath": "D:\\tmp\\test-comment\\APIMain.jar",
+  "callRelationships": [
+    {
+      "center": {
+        "fullyQualifiedName": "aosp.working.haha.APIMain.calcu",
+        "nonFullyQualifiedName": "calcu",
+        "returnType": "int",
+        "paramsType": [
+          "int",
+          "int"
+        ]
+      },
+      "methodsCallingThis": [
+        {
+          "fullyQualifiedName": "aosp.working.haha.APIMain.main",
+          "nonFullyQualifiedName": "main",
+          "returnType": "void",
+          "paramsType": [
+            "java.lang.String[]"
+          ]
+        }
+      ]
+    }
+  ]
+}

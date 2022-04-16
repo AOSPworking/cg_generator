@@ -1,0 +1,108 @@
+{
+  "jarPath": "D:\\tmp\\test-comment\\APIMain.jar",
+  "classesInfo": [
+    {
+      "fullyQualifiedName": "aosp.working.haha.APIMain$APIMainInner",
+      "methodsInfo": [
+        {
+          "methodMetadata": {
+            "fullyQualifiedName": "aosp.working.haha.APIMain$APIMainInner.<init>",
+            "nonFullyQualifiedName": "<init>",
+            "returnType": "void",
+            "paramsType": []
+          },
+          "callingMethods": [
+            {
+              "fullyQualifiedName": "java.lang.Object.<init>",
+              "nonFullyQualifiedName": "<init>",
+              "returnType": "void",
+              "paramsType": []
+            }
+          ]
+        },
+        {
+          "methodMetadata": {
+            "fullyQualifiedName": "aosp.working.haha.APIMain$APIMainInner.main",
+            "nonFullyQualifiedName": "main",
+            "returnType": "void",
+            "paramsType": [
+              "java.lang.String[]"
+            ]
+          },
+          "callingMethods": [
+            {
+              "fullyQualifiedName": "java.io.PrintStream.println",
+              "nonFullyQualifiedName": "println",
+              "returnType": "void",
+              "paramsType": [
+                "int"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "fullyQualifiedName": "aosp.working.haha.APIMain",
+      "methodsInfo": [
+        {
+          "methodMetadata": {
+            "fullyQualifiedName": "aosp.working.haha.APIMain.<init>",
+            "nonFullyQualifiedName": "<init>",
+            "returnType": "void",
+            "paramsType": []
+          },
+          "callingMethods": [
+            {
+              "fullyQualifiedName": "java.lang.Object.<init>",
+              "nonFullyQualifiedName": "<init>",
+              "returnType": "void",
+              "paramsType": []
+            }
+          ]
+        },
+        {
+          "methodMetadata": {
+            "fullyQualifiedName": "aosp.working.haha.APIMain.main",
+            "nonFullyQualifiedName": "main",
+            "returnType": "void",
+            "paramsType": [
+              "java.lang.String[]"
+            ]
+          },
+          "callingMethods": [
+            {
+              "fullyQualifiedName": "aosp.working.haha.APIMain.calcu",
+              "nonFullyQualifiedName": "calcu",
+              "returnType": "int",
+              "paramsType": [
+                "int",
+                "int"
+              ]
+            },
+            {
+              "fullyQualifiedName": "java.io.PrintStream.println",
+              "nonFullyQualifiedName": "println",
+              "returnType": "void",
+              "paramsType": [
+                "java.lang.String"
+              ]
+            }
+          ]
+        },
+        {
+          "methodMetadata": {
+            "fullyQualifiedName": "aosp.working.haha.APIMain.calcu",
+            "nonFullyQualifiedName": "calcu",
+            "returnType": "int",
+            "paramsType": [
+              "int",
+              "int"
+            ]
+          },
+          "callingMethods": []
+        }
+      ]
+    }
+  ]
+}
