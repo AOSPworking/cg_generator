@@ -33,15 +33,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-import aosp.working.cggenerator.Global;
 import aosp.working.cggenerator.dto.ClassInfo;
 import aosp.working.cggenerator.dto.JarInfo;
-import aosp.working.cggenerator.util.FileUtil;
-import aosp.working.cggenerator.util.JSONFormatUtils;
-import com.google.gson.Gson;
 import gr.gousiosg.javacg.stat.ClassVisitor;
 import org.apache.bcel.classfile.ClassParser;
 
@@ -82,13 +76,6 @@ public class JCallGraph {
             System.err.println("Error while processing jar: " + e.getMessage());
             e.printStackTrace();
             return null;
-        }
-    }
-
-    public void write(String[] args) {
-        for (String arg : args) {
-            JarInfo jarInfo = this.getAllInfoOfJar(arg);
-            jarInfo.writeJSON("output.example.json");
         }
     }
 }
