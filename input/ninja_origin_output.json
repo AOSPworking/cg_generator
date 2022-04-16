@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    {"name": "APIMain.java", "distance": 1},
+    {"name": "APIMain.jar", "distance": 2}
+  ],
+  "edges": [
+    {"target": ["APIMain.jar"], "source": ["APIMain.java"], "impact_source": []}
+  ],
+  "node_num": 1,
+  "edge_num": 1
+}
